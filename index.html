@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Galerie PWA</title>
+    <meta name="theme-color" content="#4a6fa5">
+    <meta name="description" content="Application galerie d'images PWA avec diaporama et nombreux paramètres">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖼️</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff9a76;
+            --light-color: #f5f7fa;
+            --dark-color: #2c3e50;
+            --gray-color: #7f8c8d;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .app-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .install-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(255, 154, 118, 0.3);
+        }
+
+        .install-btn:hover {
+            background-color: #ff8a5c;
+            transform: translateY(-2px);
+        }
+
+        .install-btn i {
+            font-size: 18px;
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sidebar {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .content {
+            flex: 3;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--light-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 20px;
+        }
+
+        /* Boutons principaux */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 18px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e8eef7;
+        }
+
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background-color: #ff8a5c;
+            transform: translateY(-2px);
+        }
+
+        /* Paramètres */
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .setting {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting label {
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting span {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        select {
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            border: 2px solid #e0e0e0;
+            font-size: 15px;
+            background-color: white;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        select:hover, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Galerie */
+        .gallery-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background-color: var(--light-color);
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background-color: #e8eef7;
+        }
+
+        .image-count {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 60vh;
+            padding: 5px;
+        }
+
+        .gallery-item {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: var(--transition);
+            aspect-ratio: 1;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item.selected::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(74, 111, 165, 0.3);
+            border: 3px solid var(--primary-color);
+        }
+
+        /* Mode diaporama */
+        .slideshow-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slideshow-header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 10;
+        }
+
+        .slideshow-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .slideshow-controls button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        .slideshow-controls button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .slideshow-image-container {
+            width: 90%;
+            height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slideshow-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slideshow-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 80%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+
+        .image-info {
+            text-align: center;
+            font-size: 18px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Pied de page */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray-color);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 5px;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            .sidebar, .content {
+                min-width: 100%;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                max-height: 50vh;
+            }
+            
+            .slideshow-controls button {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+
+        /* Indicateur de chargement */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+
+        .loading i {
+            font-size: 30px;
+            margin-bottom: 10px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Mode sombre */
+        .dark-mode {
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+        }
+
+        .dark-mode .sidebar,
+        .dark-mode .gallery-container {
+            background-color: #16213e;
+            color: #e6e6e6;
+        }
+
+        .dark-mode .btn-secondary {
+            background-color: #0f3460;
+            color: #e6e6e6;
+            border-color: #4a6fa5;
+        }
+
+        .dark-mode .filter-btn {
+            background-color: #0f3460;
+            color: #e6e6e6;
+            border-color: #2c3e50;
+        }
+
+        .dark-mode .setting span {
+            color: #a0a0a0;
+        }
+
+        .dark-mode input[type="range"] {
+            background: #2c3e50;
+        }
+
+        .dark-mode select {
+            background-color: #0f3460;
+            color: #e6e6e6;
+            border-color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-images"></i>
+                <h1>Ma Galerie PWA</h1>
+            </div>
+            <div class="app-info">
+                <button class="install-btn" id="installBtn">
+                    <i class="fas fa-download"></i>
+                    Installer l'application
+                </button>
+                <button class="btn btn-secondary" id="darkModeToggle">
+                    <i class="fas fa-moon"></i>
+                    Mode sombre
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div class="sidebar">
+                <div class="action-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-folder-open"></i>
+                        Importer des images
+                    </h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="loadImages">
+                            <i class="fas fa-folder-open"></i>
+                            Ouvrir la galerie
+                        </button>
+                        <button class="btn btn-secondary" id="clearGallery">
+                            <i class="fas fa-trash-alt"></i>
+                            Vider la galerie
+                        </button>
+                        <button class="btn btn-accent" id="startSlideshow">
+                            <i class="fas fa-play"></i>
+                            Démarrer le diaporama
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-sliders-h"></i>
+                        Paramètres du diaporama
+                    </h2>
+                    <div class="settings-group">
+                        <div class="setting">
+                            <label for="slideshowSpeed">Vitesse <span id="speedValue">5</span> sec</label>
+                            <div class="slider-container">
+                                <input type="range" id="slideshowSpeed" min="1" max="30" value="5">
+                                <div class="slider-value" id="speedDisplay">5</div>
+                            </div>
+                        </div>
+
+                        <div class="setting">
+                            <label for="transitionEffect">Effet de transition</label>
+                            <select id="transitionEffect">
+                                <option value="fade">Fondu</option>
+                                <option value="slide">Glissement</option>
+                                <option value="zoom">Zoom</option>
+                                <option value="none">Aucun</option>
+                            </select>
+                        </div>
+
+                        <div class="setting">
+                            <label for="imageOrder">Ordre des images</label>
+                            <select id="imageOrder">
+                                <option value="sequential">Séquentiel</option>
+                                <option value="random">Aléatoire</option>
+                                <option value="reverse">Inversé</option>
+                            </select>
+                        </div>
+
+                        <div class="setting">
+                            <label for="slideshowDirection">Direction</label>
+                            <select id="slideshowDirection">
+                                <option value="forward">Avant</option>
+                                <option value="backward">Arrière</option>
+                                <option value="bounce">Alterné</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="options-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-cog"></i>
+                        Options d'affichage
+                    </h2>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="shuffleImages" checked>
+                            <label for="shuffleImages">Mélanger les images au chargement</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="autoPlay" checked>
+                            <label for="autoPlay">Lecture automatique du diaporama</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="showInfo" checked>
+                            <label for="showInfo">Afficher les infos pendant le diaporama</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="loopSlideshow" checked>
+                            <label for="loopSlideshow">Boucler le diaporama</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="gallery-container">
+                    <div class="gallery-controls">
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">Toutes</button>
+                            <button class="filter-btn" data-filter="portrait">Portrait</button>
+                            <button class="filter-btn" data-filter="landscape">Paysage</button>
+                            <button class="filter-btn" data-filter="square">Carré</button>
+                        </div>
+                        <div class="image-count">
+                            <span id="imageCount">0</span> images
+                        </div>
+                    </div>
+
+                    <div class="loading" id="loadingIndicator">
+                        <i class="fas fa-spinner"></i>
+                        <p>Chargement des images...</p>
+                    </div>
+
+                    <div class="gallery" id="imageGallery">
+                        <!-- Les images seront insérées ici dynamiquement -->
+                        <div class="empty-gallery-message" style="text-align: center; padding: 50px; color: var(--gray-color); grid-column: 1 / -1;">
+                            <i class="fas fa-images" style="font-size: 60px; margin-bottom: 20px; opacity: 0.5;"></i>
+                            <h3 style="margin-bottom: 10px;">Galerie vide</h3>
+                            <p>Cliquez sur "Ouvrir la galerie" pour importer des images</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Application Galerie PWA &copy; 2023 - Tous droits réservés</p>
+            <p style="font-size: 12px; margin-top: 5px;">Utilisez le bouton "Installer l'application" pour une expérience optimale</p>
+        </footer>
+    </div>
+
+    <!-- Mode diaporama -->
+    <div class="slideshow-container" id="slideshow">
+        <div class="slideshow-header">
+            <div class="slideshow-info">
+                <h2>Diaporama</h2>
+            </div>
+            <div class="slideshow-controls">
+                <button id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="playPauseBtn">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button id="exitSlideshow">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="slideshow-image-container">
+            <img class="slideshow-image" id="slideshowImage" src="" alt="Diaporama">
+        </div>
+
+        <div class="slideshow-footer">
+            <div class="image-info" id="slideshowInfo">
+                Image 1 sur 0
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="slideshowProgress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Opération réussie</span>
+    </div>
+
+    <!-- Service Worker et Manifest intégrés dans le script -->
+    <script>
+        // Déclaration des variables globales
+        let images = [];
+        let currentFilter = 'all';
+        let currentSlideshowIndex = 0;
+        let slideshowInterval;
+        let isSlideshowPlaying = false;
+        let isDarkMode = false;
+
+        // Éléments DOM
+        const imageGallery = document.getElementById('imageGallery');
+        const imageCount = document.getElementById('imageCount');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const slideshow = document.getElementById('slideshow');
+        const slideshowImage = document.getElementById('slideshowImage');
+        const slideshowInfo = document.getElementById('slideshowInfo');
+        const slideshowProgress = document.getElementById('slideshowProgress');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger les images depuis le stockage local si disponibles
+            loadImagesFromStorage();
+            
+            // Configurer les événements
+            setupEventListeners();
+            
+            // Configurer la PWA
+            setupPWA();
+            
+            // Afficher le nombre d'images
+            updateImageCount();
+        });
+
+        // Configuration des événements
+        function setupEventListeners() {
+            // Boutons d'action
+            document.getElementById('loadImages').addEventListener('click', openImagePicker);
+            document.getElementById('clearGallery').addEventListener('click', clearGallery);
+            document.getElementById('startSlideshow').addEventListener('click', startSlideshow);
+            document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+
+            // Filtres
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.getAttribute('data-filter');
+                    filterImages();
+                });
+            });
+
+            // Paramètres du diaporama
+            document.getElementById('slideshowSpeed').addEventListener('input', function() {
+                const value = this.value;
+                document.getElementById('speedValue').textContent = value;
+                document.getElementById('speedDisplay').textContent = value;
+                
+                // Redémarrer le diaporama si en cours
+                if (isSlideshowPlaying) {
+                    stopSlideshow();
+                    startSlideshowInterval();
+                }
+            });
+
+            // Contrôles du diaporama
+            document.getElementById('exitSlideshow').addEventListener('click', exitSlideshow);
+            document.getElementById('prevBtn').addEventListener('click', prevSlide);
+            document.getElementById('nextBtn').addEventListener('click', nextSlide);
+            document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
+            
+            // Fermer le diaporama avec la touche Échap
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && slideshow.style.display === 'flex') {
+                    exitSlideshow();
+                }
+            });
+        }
+
+        // Configuration PWA
+        function setupPWA() {
+            // Enregistrement du Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    // Création d'un Service Worker inline
+                    const serviceWorkerCode = `
+                        self.addEventListener('install', event => {
+                            event.waitUntil(
+                                caches.open('gallery-pwa-v1').then(cache => {
+                                    return cache.addAll([
+                                        './',
+                                        './index.html'
+                                    ]);
+                                })
+                            );
+                        });
+
+                        self.addEventListener('fetch', event => {
+                            event.respondWith(
+                                caches.match(event.request).then(response => {
+                                    return response || fetch(event.request);
+                                })
+                            );
+                        });
+                    `;
+                    
+                    const blob = new Blob([serviceWorkerCode], { type: 'application/javascript' });
+                    const swURL = URL.createObjectURL(blob);
+                    
+                    navigator.serviceWorker.register(swURL)
+                        .then(registration => {
+                            console.log('Service Worker enregistré avec succès:', registration);
+                        })
+                        .catch(error => {
+                            console.log('Échec de l\'enregistrement du Service Worker:', error);
+                        });
+                });
+            }
+
+            // Installation de l'application
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'flex';
+                
+                installBtn.addEventListener('click', () => {
+                    installBtn.style.display = 'none';
+                    deferredPrompt.prompt();
+                    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            showNotification('Application installée avec succès!');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            });
+            
+            // Masquer le bouton d'installation si l'app est déjà installée
+            window.addEventListener('appinstalled', () => {
+                installBtn.style.display = 'none';
+            });
+        }
+
+        // Ouvrir le sélecteur d'images
+        function openImagePicker() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            
+            input.onchange = function(e) {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) {
+                    loadImages(files);
+                }
+            };
+            
+            input.click();
+        }
+
+        // Charger les images
+        function loadImages(files) {
+            showLoading(true);
+            
+            // Effacer les anciennes images si nécessaire
+            const clearOld = images.length > 0;
+            if (clearOld) images = [];
+            
+            let loadedCount = 0;
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        const imageData = {
+                            id: Date.now() + index,
+                            url: e.target.result,
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            width: img.width,
+                            height: img.height,
+                            orientation: img.width > img.height ? 'landscape' : 
+                                        img.width < img.height ? 'portrait' : 'square',
+                            date: new Date().toISOString()
+                        };
+                        
+                        images.push(imageData);
+                        loadedCount++;
+                        
+                        if (loadedCount === files.length) {
+                            // Mélanger les images si l'option est activée
+                            if (document.getElementById('shuffleImages').checked) {
+                                shuffleArray(images);
+                            }
+                            
+                            // Sauvegarder dans le stockage local
+                            saveImagesToStorage();
+                            
+                            // Afficher les images
+                            displayImages();
+                            
+                            // Mettre à jour le compteur
+                            updateImageCount();
+                            
+                            showLoading(false);
+                            
+                            // Afficher une notification
+                            showNotification(`${files.length} image(s) chargée(s) avec succès`);
+                        }
+                    };
+                    
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Charger les images depuis le stockage local
+        function loadImagesFromStorage() {
+            const savedImages = localStorage.getItem('galleryImages');
+            if (savedImages) {
+                images = JSON.parse(savedImages);
+                if (images.length > 0) {
+                    displayImages();
+                }
+            }
+        }
+
+        // Sauvegarder les images dans le stockage local
+        function saveImagesToStorage() {
+            localStorage.setItem('galleryImages', JSON.stringify(images));
+        }
+
+        // Afficher les images dans la galerie
+        function displayImages() {
+            imageGallery.innerHTML = '';
+            
+            if (images.length === 0) {
+                imageGallery.innerHTML = `
+                    <div class="empty-gallery-message" style="text-align: center; padding: 50px; color: var(--gray-color); grid-column: 1 / -1;">
+                        <i class="fas fa-images" style="font-size: 60px; margin-bottom: 20px; opacity: 0.5;"></i>
+                        <h3 style="margin-bottom: 10px;">Galerie vide</h3>
+                        <p>Cliquez sur "Ouvrir la galerie" pour importer des images</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Filtrer les images selon le filtre actif
+            let filteredImages = images;
+            if (currentFilter !== 'all') {
+                filteredImages = images.filter(img => img.orientation === currentFilter);
+            }
+            
+            // Afficher chaque image
+            filteredImages.forEach((image, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.dataset.id = image.id;
+                galleryItem.dataset.index = index;
+                
+                galleryItem.innerHTML = `
+                    <img src="${image.url}" alt="${image.name}" loading="lazy">
+                `;
+                
+                galleryItem.addEventListener('click', () => {
+                    // Si on est en mode diaporama, on ne fait rien
+                    if (slideshow.style.display === 'flex') return;
+                    
+                    // Sinon, on démarre le diaporama à partir de cette image
+                    currentSlideshowIndex = index;
+                    startSlideshow();
+                });
+                
+                imageGallery.appendChild(galleryItem);
+            });
+        }
+
+        // Filtrer les images
+        function filterImages() {
+            displayImages();
+            updateImageCount();
+        }
+
+        // Mettre à jour le compteur d'images
+        function updateImageCount() {
+            let count = images.length;
+            
+            if (currentFilter !== 'all') {
+                count = images.filter(img => img.orientation === currentFilter).length;
+            }
+            
+            imageCount.textContent = count;
+        }
+
+        // Vider la galerie
+        function clearGallery() {
+            if (images.length === 0) {
+                showNotification('La galerie est déjà vide');
+                return;
+            }
+            
+            if (confirm(`Êtes-vous sûr de vouloir supprimer toutes les images (${images.length}) ?`)) {
+                images = [];
+                localStorage.removeItem('galleryImages');
+                displayImages();
+                updateImageCount();
+                showNotification('Galerie vidée avec succès');
+                
+                // Arrêter le diaporama s'il est en cours
+                if (isSlideshowPlaying) {
+                    exitSlideshow();
+                }
+            }
+        }
+
+        // Démarrer le diaporama
+        function startSlideshow() {
+            if (images.length === 0) {
+                showNotification('Aucune image à afficher dans le diaporama');
+                return;
+            }
+            
+            // Déterminer l'index de départ
+            if (currentSlideshowIndex >= images.length) {
+                currentSlideshowIndex = 0;
+            }
+            
+            // Afficher le diaporama
+            slideshow.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Afficher la première image
+            showSlide(currentSlideshowIndex);
+            
+            // Démarrer l'intervalle si lecture automatique
+            if (document.getElementById('autoPlay').checked) {
+                startSlideshowInterval();
+                isSlideshowPlaying = true;
+                updatePlayPauseButton();
+            }
+        }
+
+        // Afficher une diapositive spécifique
+        function showSlide(index) {
+            if (images.length === 0) return;
+            
+            // S'assurer que l'index est dans les limites
+            if (index < 0) index = images.length - 1;
+            if (index >= images.length) index = 0;
+            
+            currentSlideshowIndex = index;
+            const image = images[index];
+            
+            // Appliquer l'effet de transition
+            const transitionEffect = document.getElementById('transitionEffect').value;
+            slideshowImage.style.opacity = 0;
+            
+            setTimeout(() => {
+                slideshowImage.src = image.url;
+                slideshowImage.alt = image.name;
+                
+                // Mettre à jour les informations
+                slideshowInfo.textContent = `Image ${index + 1} sur ${images.length} - ${image.name}`;
+                
+                // Mettre à jour la barre de progression
+                const progress = ((index + 1) / images.length) * 100;
+                slideshowProgress.style.width = `${progress}%`;
+                
+                // Réappliquer l'opacité avec l'effet
+                setTimeout(() => {
+                    slideshowImage.style.opacity = 1;
+                    slideshowImage.style.transition = `opacity 0.5s ease`;
+                    
+                    if (transitionEffect === 'slide') {
+                        slideshowImage.style.transform = 'translateX(0)';
+                    } else if (transitionEffect === 'zoom') {
+                        slideshowImage.style.transform = 'scale(1)';
+                    }
+                }, 50);
+            }, 300);
+        }
+
+        // Diapositive suivante
+        function nextSlide() {
+            const order = document.getElementById('imageOrder').value;
+            const direction = document.getElementById('slideshowDirection').value;
+            
+            let nextIndex;
+            
+            if (order === 'random') {
+                nextIndex = Math.floor(Math.random() * images.length);
+            } else if (order === 'reverse') {
+                nextIndex = currentSlideshowIndex - 1;
+                if (nextIndex < 0) nextIndex = images.length - 1;
+            } else {
+                // Séquentiel
+                if (direction === 'forward') {
+                    nextIndex = currentSlideshowIndex + 1;
+                } else if (direction === 'backward') {
+                    nextIndex = currentSlideshowIndex - 1;
+                } else {
+                    // Alterné (bounce)
+                    // Pour simplifier, on alterne entre avant et arrière tous les cycles
+                    const cycle = Math.floor(currentSlideshowIndex / (images.length - 1));
+                    if (cycle % 2 === 0) {
+                        // Aller
+                        nextIndex = currentSlideshowIndex + 1;
+                        if (nextIndex >= images.length) nextIndex = images.length - 2;
+                    } else {
+                        // Retour
+                        nextIndex = currentSlideshowIndex - 1;
+                        if (nextIndex < 0) nextIndex = 1;
+                    }
+                }
+            }
+            
+            // Gérer la boucle
+            if (nextIndex >= images.length) {
+                if (document.getElementById('loopSlideshow').checked) {
+                    nextIndex = 0;
+                } else {
+                    // Arrêter le diaporama
+                    stopSlideshow();
+                    return;
+                }
+            }
+            
+            if (nextIndex < 0) {
+                if (document.getElementById('loopSlideshow').checked) {
+                    nextIndex = images.length - 1;
+                } else {
+                    // Arrêter le diaporama
+                    stopSlideshow();
+                    return;
+                }
+            }
+            
+            showSlide(nextIndex);
+        }
+
+        // Diapositive précédente
+        function prevSlide() {
+            const order = document.getElementById('imageOrder').value;
+            
+            let prevIndex;
+            
+            if (order === 'random') {
+                prevIndex = Math.floor(Math.random() * images.length);
+            } else if (order === 'reverse') {
+                prevIndex = currentSlideshowIndex + 1;
+                if (prevIndex >= images.length) prevIndex = 0;
+            } else {
+                prevIndex = currentSlideshowIndex - 1;
+            }
+            
+            // Gérer la boucle
+            if (prevIndex < 0) {
+                if (document.getElementById('loopSlideshow').checked) {
+                    prevIndex = images.length - 1;
+                } else {
+                    // Arrêter le diaporama
+                    stopSlideshow();
+                    return;
+                }
+            }
+            
+            showSlide(prevIndex);
+        }
+
+        // Démarrer l'intervalle du diaporama
+        function startSlideshowInterval() {
+            const speed = document.getElementById('slideshowSpeed').value * 1000;
+            
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+            }
+            
+            slideshowInterval = setInterval(() => {
+                nextSlide();
+            }, speed);
+        }
+
+        // Arrêter l'intervalle du diaporama
+        function stopSlideshow() {
+            if (slideshowInterval) {
+                clearInterval(slideshowInterval);
+                slideshowInterval = null;
+            }
+            
+            isSlideshowPlaying = false;
+            updatePlayPauseButton();
+        }
+
+        // Basculer lecture/pause
+        function togglePlayPause() {
+            if (isSlideshowPlaying) {
+                stopSlideshow();
+            } else {
+                startSlideshowInterval();
+                isSlideshowPlaying = true;
+            }
+            
+            updatePlayPauseButton();
+        }
+
+        // Mettre à jour le bouton lecture/pause
+        function updatePlayPauseButton() {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const icon = playPauseBtn.querySelector('i');
+            
+            if (isSlideshowPlaying) {
+                icon.className = 'fas fa-pause';
+            } else {
+                icon.className = 'fas fa-play';
+            }
+        }
+
+        // Quitter le diaporama
+        function exitSlideshow() {
+            slideshow.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            stopSlideshow();
+        }
+
+        // Mélanger un tableau (aléatoire)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Basculer le mode sombre
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const icon = darkModeToggle.querySelector('i');
+            
+            if (isDarkMode) {
+                icon.className = 'fas fa-sun';
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Mode clair';
+            } else {
+                icon.className = 'fas fa-moon';
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i> Mode sombre';
+            }
+            
+            // Sauvegarder la préférence
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Afficher/masquer l'indicateur de chargement
+        function showLoading(show) {
+            loadingIndicator.style.display = show ? 'block' : 'none';
+        }
+
+        // Afficher une notification
+        function showNotification(message, duration = 3000) {
+            notificationText.textContent = message;
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, duration);
+        }
+
+        // Vérifier la préférence de mode sombre au chargement
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'true') {
+            isDarkMode = true;
+            document.body.classList.add('dark-mode');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.innerHTML = '<i class="fas fa-sun"></i> Mode clair';
+        }
+
+        // Création du manifest PWA dynamique
+        const manifest = {
+            "name": "Ma Galerie PWA",
+            "short_name": "Galerie",
+            "description": "Application galerie d'images PWA avec diaporama",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#4a6fa5",
+            "theme_color": "#4a6fa5",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%234a6fa5%22>🖼️</text></svg>",
+                    "sizes": "any",
+                    "type": "image/svg+xml"
+                }
+            ]
+        };
+
+        // Ajouter le manifest à la page
+        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestURL;
+        document.head.appendChild(link);
+    </script>
+</body>
+</html>
